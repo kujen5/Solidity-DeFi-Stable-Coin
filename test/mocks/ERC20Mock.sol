@@ -2,6 +2,15 @@
 pragma solidity ^0.8.18;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+/**
+ * @title ERC20Mock
+ * @author Foued SAIDI - 0xkujen
+ * @notice this mock is destined to simulate a normal ERC20 token with its basic features:
+ * - mint
+ * - burn
+ * - transfer
+ * - approve
+ */
 
 contract ERC20Mock is ERC20 {
     constructor(
