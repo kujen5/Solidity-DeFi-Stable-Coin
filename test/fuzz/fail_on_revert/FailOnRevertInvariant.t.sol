@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
@@ -12,15 +11,13 @@ import {KujenStableCoin} from "../../../src/KujenStableCoin.sol";
 import {ERC20Mock} from "../../mocks/ERC20Mock.sol";
 import {DeployKSC} from "../../../script/DeployKSC.s.sol";
 
-
 /**
  * Invariants for this test suite:
  * - protocol must always be overcollateralized
  * - users cant mint KSC with a bad health factor
- * - can only liquidate a user if they have a bad health factor 
+ * - can only liquidate a user if they have a bad health factor
  */
-contract RevertOnRevertInvariant is StdInvariant,Test {
-
+contract RevertOnRevertInvariant is StdInvariant, Test {
     KSCEngine public kscEngine;
     KujenStableCoin public ksc;
     HelperConfig public helperConfig;
@@ -38,11 +35,11 @@ contract RevertOnRevertInvariant is StdInvariant,Test {
     uint256 public collateralToCover = 20 ether;
     FailOnRevertHandler public handler;
 
-    function setUp() external{
+    function setUp() external {
         DeployKSC deployer = new DeployKSC();
-        (ksc,kscEngine,helperConfig)=deployer.run();
-        (ethUSDPriceFeed,btcUSDPriceFeed,weth,wbtc,)=helperConfig.activeNetworkConfig();
-        handler=new FailOnRevertHandler(kscEngine,ksc);
+        (ksc, kscEngine, helperConfig) = deployer.run();
+        (ethUSDPriceFeed, btcUSDPriceFeed, weth, wbtc,) = helperConfig.activeNetworkConfig();
+        handler = new FailOnRevertHandler(kscEngine, ksc);
         targetContract(address(handler)); // we define our target contract for invariant tests
     }
 

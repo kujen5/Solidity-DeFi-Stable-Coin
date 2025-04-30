@@ -11,15 +11,13 @@ import {KujenStableCoin} from "../../../src/KujenStableCoin.sol";
 import {ERC20Mock} from "../../mocks/ERC20Mock.sol";
 import {DeployKSC} from "../../../script/DeployKSC.s.sol";
 
-
 /**
  * Invariants for this test suite:
  * - protocol must always be overcollateralized
  * - users cant mint KSC with a bad health factor
- * - can only liquidate a user if they have a bad health factor 
+ * - can only liquidate a user if they have a bad health factor
  */
-contract ContinueOnRevertInvariant is StdInvariant,Test {
-
+contract ContinueOnRevertInvariant is StdInvariant, Test {
     KSCEngine public kscEngine;
     KujenStableCoin public ksc;
     HelperConfig public helperConfig;
@@ -37,31 +35,28 @@ contract ContinueOnRevertInvariant is StdInvariant,Test {
     uint256 public collateralToCover = 20 ether;
     ContinueOnRevertHandler public handler;
 
-    function setUp() external{
+    function setUp() external {
         DeployKSC deployer = new DeployKSC();
-        (ksc,kscEngine,helperConfig)=deployer.run();
-        (ethUSDPriceFeed,btcUSDPriceFeed,weth,wbtc,)=helperConfig.activeNetworkConfig();
-        handler=new ContinueOnRevertHandler(kscEngine,ksc);
+        (ksc, kscEngine, helperConfig) = deployer.run();
+        (ethUSDPriceFeed, btcUSDPriceFeed, weth, wbtc,) = helperConfig.activeNetworkConfig();
+        handler = new ContinueOnRevertHandler(kscEngine, ksc);
         targetContract(address(handler)); // we define our target contract for invariant tests
     }
 
-    function invariant_proocolMustHaveMoreValueThanTotalSupplyDollars() public view{
-        uint256 totalSupply=ksc.totalSupply();
-        uint256 wethDeposited=ERC20Mock(weth).balanceOf(address(kscEngine));
-        uint256 wbtcDeposited=ERC20Mock(wbtc).balanceOf(address(kscEngine));
-        uint256 wethValue=kscEngine.getUSDConversionRate(weth, wethDeposited);
-        uint256 wbtcValue=kscEngine.getUSDConversionRate(wbtc, wbtcDeposited);
-        console.log("Total Supply: %s",totalSupply);
-        console.log("wethValue: %s",wethValue);
-        console.log("wbtcValue: %s",wbtcValue);
-        assert(wethValue+wbtcValue>=totalSupply);
+    function invariant_proocolMustHaveMoreValueThanTotalSupplyDollars() public view {
+        uint256 totalSupply = ksc.totalSupply();
+        uint256 wethDeposited = ERC20Mock(weth).balanceOf(address(kscEngine));
+        uint256 wbtcDeposited = ERC20Mock(wbtc).balanceOf(address(kscEngine));
+        uint256 wethValue = kscEngine.getUSDConversionRate(weth, wethDeposited);
+        uint256 wbtcValue = kscEngine.getUSDConversionRate(wbtc, wbtcDeposited);
+        console.log("Total Supply: %s", totalSupply);
+        console.log("wethValue: %s", wethValue);
+        console.log("wbtcValue: %s", wbtcValue);
+        assert(wethValue + wbtcValue >= totalSupply);
         //assertGt(wethValue+wbtcValue, totalSupply);
-
     }
 
     function invariant_callSummary() public view {
         handler.callSummary();
     }
-
-
 }

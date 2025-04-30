@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.18;
@@ -41,7 +40,7 @@ contract FailOnRevertHandler is Test {
         ERC20Mock collateral = _getCollateralFromSeed(p_collateralSeed); // determine which collateral to use
         vm.startPrank(msg.sender);
         collateral.mint(msg.sender, p_collateralTokenAmount); // mint the user some collateral
-        collateral.approve(address(kscEngine),p_collateralTokenAmount);
+        collateral.approve(address(kscEngine), p_collateralTokenAmount);
         kscEngine.depositCollateral(address(collateral), p_collateralTokenAmount); // deposit the collateral
         vm.stopPrank();
     }
@@ -55,15 +54,14 @@ contract FailOnRevertHandler is Test {
 
     function burnKSC(uint256 p_amountToBurn) public {
         p_amountToBurn = bound(p_amountToBurn, 0, ksc.balanceOf(msg.sender)); // cuz you cant burn more that what you have
-        if(p_amountToBurn==0){
+        if (p_amountToBurn == 0) {
             return;
         }
         vm.startPrank(msg.sender);
-        ksc.approve(address(kscEngine),p_amountToBurn);
+        ksc.approve(address(kscEngine), p_amountToBurn);
         ksc.burn(p_amountToBurn);
         vm.stopPrank();
     }
-
 
     function liquidate(uint256 p_collateralSeed, address p_userToBeLiquidated, uint256 p_debtToCover) public {
         uint256 minHealthFactor = kscEngine.getMinHealthFactor();
@@ -72,7 +70,7 @@ contract FailOnRevertHandler is Test {
             return;
         }
         p_debtToCover = bound(p_debtToCover, 1, uint256(type(uint96).max));
-        
+
         ERC20Mock collateral = _getCollateralFromSeed(p_collateralSeed);
         kscEngine.liquidateAssets(address(collateral), p_userToBeLiquidated, p_debtToCover);
     }

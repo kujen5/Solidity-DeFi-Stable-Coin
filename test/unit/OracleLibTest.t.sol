@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.18;
 
-import { MockV3Aggregator } from "../mocks/MockV3Aggregator.sol";
-import { Test, console } from "forge-std/Test.sol";
-import { StdCheats } from "forge-std/StdCheats.sol";
-import { OracleLib, AggregatorV3Interface } from "../../src/libraries/OracleLib.sol";
+import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
+import {Test, console} from "forge-std/Test.sol";
+import {StdCheats} from "forge-std/StdCheats.sol";
+import {OracleLib, AggregatorV3Interface} from "../../src/libraries/OracleLib.sol";
 
 contract OracleLibTest is StdCheats, Test {
     using OracleLib for AggregatorV3Interface;
@@ -17,6 +17,7 @@ contract OracleLibTest is StdCheats, Test {
     function setUp() public {
         aggregator = new MockV3Aggregator(DECIMALS, INITAL_PRICE);
     }
+
     function testPriceRevertsOnStaleCheck() public {
         vm.warp(block.timestamp + 5 hours + 1337 seconds);
         vm.roll(block.number + 1);
@@ -35,11 +36,9 @@ contract OracleLibTest is StdCheats, Test {
         vm.expectRevert(OracleLib.OracleLib__StalePrice.selector);
         AggregatorV3Interface(address(aggregator)).staleCheckLatestRoundData();
     }
+
     function testGetTimeoutCorrectly() public {
-        uint256 expectedTimeOut=3 hours;
-        assertEq(expectedTimeOut,OracleLib.getTimeout(AggregatorV3Interface(address(aggregator))));
+        uint256 expectedTimeOut = 3 hours;
+        assertEq(expectedTimeOut, OracleLib.getTimeout(AggregatorV3Interface(address(aggregator))));
     }
-
-
-
 }

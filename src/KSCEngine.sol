@@ -87,6 +87,22 @@ contract KSCEngine is
         i_ksc = KujenStableCoin(p_kscAddress);
     }
 
+    function depositCollateral(address p_collateralTokenAddress, uint256 p_collateralAmountToDeposit)
+        public
+        nonReentrant
+        biggerThanZero(p_collateralAmountToDeposit)
+        isTokenAllowed(p_collateralTokenAddress)
+    {
+        s_collateralDeposited[msg.sender][p_collateralTokenAddress] += p_collateralAmountToDeposit;
+        emit CollateralDeposited(msg.sender, p_collateralTokenAddress, p_collateralAmountToDeposit);
+        ///@notice transfer the amount of X token from msg.sender to this contract's address
+        bool success =
+            IERC20(p_collateralTokenAddress).transferFrom(msg.sender, address(this), p_collateralAmountToDeposit);
+        if (!success) {
+            revert KSCEngine__TransferFailed();
+        }
+    }
+
     function depositCollateralAndMintKSC(
         address p_collateralTokenAddress,
         uint256 p_collateralAmountToDeposit,
@@ -158,22 +174,6 @@ contract KSCEngine is
         bool minted = i_ksc.mint(msg.sender, p_kscAmountToMint);
         if (minted != true) {
             revert KSCEngine__MintFailed();
-        }
-    }
-
-    function depositCollateral(address p_collateralTokenAddress, uint256 p_collateralAmountToDeposit)
-        public
-        nonReentrant
-        biggerThanZero(p_collateralAmountToDeposit)
-        isTokenAllowed(p_collateralTokenAddress)
-    {
-        s_collateralDeposited[msg.sender][p_collateralTokenAddress] += p_collateralAmountToDeposit;
-        emit CollateralDeposited(msg.sender, p_collateralTokenAddress, p_collateralAmountToDeposit);
-        ///@notice transfer the amount of X token from msg.sender to this contract's address
-        bool success =
-            IERC20(p_collateralTokenAddress).transferFrom(msg.sender, address(this), p_collateralAmountToDeposit);
-        if (!success) {
-            revert KSCEngine__TransferFailed();
         }
     }
 
