@@ -15,6 +15,9 @@ jobs:
 
     name: Foundry project
     runs-on: ubuntu-latest
+    env:
+      DEFAULT_ANVIL_PRIVATE_KEY: ${{ secrets.DEFAULT_ANVIL_PRIVATE_KEY }}
+      ETHEREUM_SEPOLIA_PRIVATE_KEY: ${{secrets.ETHEREUM_SEPOLIA_PRIVATE_KEY}}
     steps:
       - uses: actions/checkout@v4
         with:
