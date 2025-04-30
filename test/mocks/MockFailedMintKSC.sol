@@ -12,7 +12,8 @@ contract MockFailedMintKSC is ERC20Burnable, Ownable(msg.sender) {
     error MockFailedTransfer__AmountToBurnMustBeStriclyBiggerThanZero();
     error MockFailedTransfer__AmountToBurnMustBeEqualToOrHigherThanUserBalance();
     error DecentralizedStableCoin__NotZeroAddress();
-    constructor() ERC20("DecentralizedStableCoin", "DSC") { }
+
+    constructor() ERC20("DecentralizedStableCoin", "DSC") {}
 
     function burn(uint256 _amount) public override onlyOwner {
         uint256 balance = balanceOf(msg.sender);
@@ -25,7 +26,8 @@ contract MockFailedMintKSC is ERC20Burnable, Ownable(msg.sender) {
         super.burn(_amount);
     }
 
-    function mint(address _to, uint256 _amount) external onlyOwner returns (bool) { // mint function returns false on purpose 
+    function mint(address _to, uint256 _amount) external onlyOwner returns (bool) {
+        // mint function returns false on purpose
         if (_to == address(0)) {
             revert DecentralizedStableCoin__NotZeroAddress();
         }

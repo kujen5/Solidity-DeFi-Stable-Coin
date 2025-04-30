@@ -22,7 +22,6 @@ contract KSCEngine is
     error KSCEngine__TransferFailed();
     error KSCEngine__HealthFactorIsBroken(uint256 userHealthFactor);
     error KSCEngine__MintFailed();
-    error KSCEngine__KSCTransferFailed();
     error KSCEngine__UserHealthFactorIsOK();
     error KSCEngine__HealthFactorDidNotImprove();
 
@@ -41,7 +40,7 @@ contract KSCEngine is
     /// @notice basically just to convert values to be compatible for our precision factors
     uint256 private constant PRECISION = 1e18;
     ///@notice this is basically used to transform the returned pricefeed answer from 8 decimals (default) to 18 decimals
-    uint256 private constant PRICEFEED_DECIMALS_PRECISION = 1e10;
+    uint256 private constant ADDITIONAL_PRICEFEED_DECIMALS_PRECISION = 1e10;
 
     mapping(address collateralTokenToBeDeposited => address priceFeed) private s_tokenToPriceFeedArray;
     mapping(address user => mapping(address collateralTokenAddress => uint256 collateralAmountToDeposit)) private
@@ -51,7 +50,10 @@ contract KSCEngine is
 
     event CollateralDeposited(address depositerAddress, address collateralTokenAddress, uint256 amountToBeDeposited);
     event CollateralRedeemed(
-        address fromAddress, address toAddress, address collateralTokenAddress, uint256 collateralAmountToRedeem
+        address indexed fromAddress,
+        address indexed toAddress,
+        address collateralTokenAddress,
+        uint256 collateralAmountToRedeem
     );
 
     modifier biggerThanZero(uint256 _amount) {
@@ -162,6 +164,7 @@ contract KSCEngine is
     function depositCollateral(address p_collateralTokenAddress, uint256 p_collateralAmountToDeposit)
         public
         nonReentrant
+        biggerThanZero(p_collateralAmountToDeposit)
         isTokenAllowed(p_collateralTokenAddress)
     {
         s_collateralDeposited[msg.sender][p_collateralTokenAddress] += p_collateralAmountToDeposit;
@@ -184,7 +187,7 @@ contract KSCEngine is
         emit CollateralRedeemed(p_fromAddress, p_toAddress, p_collateralTokenAddress, p_collateralAmountToRedeem);
         bool success = IERC20(p_collateralTokenAddress).transfer(p_toAddress, p_collateralAmountToRedeem);
         if (!success) {
-            revert KSCEngine__KSCTransferFailed();
+            revert KSCEngine__TransferFailed();
         }
     }
 
@@ -192,7 +195,7 @@ contract KSCEngine is
         s_KSCMinted[p_onBehalfOfUser] -= p_kscAmountToBurn;
         bool success = i_ksc.transferFrom(p_kscFromUser, address(this), p_kscAmountToBurn); // we transfer the KSC from a lender to our Engine and then we burn it
         if (!success) {
-            revert KSCEngine__KSCTransferFailed();
+            revert KSCEngine__TransferFailed();
         }
         i_ksc.burn(p_kscAmountToBurn);
     }
@@ -225,7 +228,7 @@ contract KSCEngine is
         => lastly we divide by the precision factor or 1e18
         => and we get 2000$
         */
-        return ((uint256(usdPrice) * PRICEFEED_DECIMALS_PRECISION) * p_amount) / PRECISION;
+        return ((uint256(usdPrice) * ADDITIONAL_PRICEFEED_DECIMALS_PRECISION) * p_amount) / PRECISION;
     }
 
     function _calculateHealthFactor(uint256 p_totalKSCMinted, uint256 p_collateralValueInUSD)
@@ -292,7 +295,7 @@ contract KSCEngine is
     {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_tokenToPriceFeedArray[p_collateralTokenAddress]);
         (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
-        return (p_usdAmount * PRECISION) / (uint256(price) * PRICEFEED_DECIMALS_PRECISION);
+        return (p_usdAmount * PRECISION) / (uint256(price) * ADDITIONAL_PRICEFEED_DECIMALS_PRECISION);
     }
 
     function getPrecisionFactor() external pure returns (uint256) {
@@ -300,11 +303,15 @@ contract KSCEngine is
     }
 
     function getAdditionalFeedPrecision() external pure returns (uint256) {
-        return PRICEFEED_DECIMALS_PRECISION;
+        return ADDITIONAL_PRICEFEED_DECIMALS_PRECISION;
     }
 
     function getLiquidationThreshold() external pure returns (uint256) {
         return LIQUIDATION_THRESHOLD;
+    }
+
+    function getLiquidationPrecision() external pure returns (uint256) {
+        return LIQUIDATION_PRECISION_FACTOR;
     }
 
     function getLiquidationBonus() external pure returns (uint256) {

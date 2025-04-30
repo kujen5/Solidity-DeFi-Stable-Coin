@@ -29,4 +29,7 @@ library OracleLib {
         if (secondsSinceLastUpdate > TIMEOUT) revert OracleLib__StalePrice(); // if the latest update was more than 3 hours ago, revert
         return (roundId, answer, startedAt, updatedAt, answeredInRound);
     }
+    function getTimeout(AggregatorV3Interface /* chainlinkFeed */ ) public pure returns (uint256) {
+        return TIMEOUT;
+    }
 }

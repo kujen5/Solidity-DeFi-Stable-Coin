@@ -3,8 +3,7 @@ pragma solidity ^0.8.18;
 
 import {ERC20Burnable, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import { MockV3Aggregator } from "./MockV3Aggregator.sol";
-
+import {MockV3Aggregator} from "./MockV3Aggregator.sol";
 
 /// @title MockMoreDebtKSC
 /// @author Foued SAIDI - 0xkujen
@@ -15,6 +14,7 @@ contract MockMoreDebtKSC is ERC20Burnable, Ownable(msg.sender) {
     error DecentralizedStableCoin__NotZeroAddress();
 
     address mockAggregator;
+
     constructor(address _mockAggregator) ERC20("DecentralizedStableCoin", "DSC") {
         mockAggregator = _mockAggregator;
     }
@@ -43,4 +43,3 @@ contract MockMoreDebtKSC is ERC20Burnable, Ownable(msg.sender) {
         return true;
     }
 }
-
